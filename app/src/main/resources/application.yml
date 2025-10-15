@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: cybershield-conference
+  datasource:
+    url: jdbc:mysql://localhost:3306/cybershield?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: cybershield
+    password: cybershield
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  thymeleaf:
+    cache: false
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.infosecconference: DEBUG
+server:
+  port: 8080

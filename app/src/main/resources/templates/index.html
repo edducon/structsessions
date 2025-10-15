@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CyberShield Conference Manager</title>
+    <link rel="icon" type="image/x-icon" th:href="@{/images/icon.ico}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="app-header">
+    <div class="logo-block">
+        <img class="logo" th:src="@{/images/logo.png}" alt="CyberShield"/>
+        <div>
+            <h1>CyberShield Conference Manager</h1>
+            <p class="tagline">Цифровой штаб конференции по информационной безопасности</p>
+        </div>
+    </div>
+    <form class="import-form" method="post" th:action="@{/import}">
+        <button type="submit" class="primary-btn">Импортировать данные</button>
+    </form>
+</header>
+
+<main>
+    <section class="stats">
+        <article class="stat-card">
+            <span class="stat-value" th:text="${participantsCount}">0</span>
+            <span class="stat-label">Участников</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-value" th:text="${moderatorsCount}">0</span>
+            <span class="stat-label">Модераторов</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-value" th:text="${juryCount}">0</span>
+            <span class="stat-label">Жюри</span>
+        </article>
+        <article class="stat-card">
+            <span class="stat-value" th:text="${organizersCount}">0</span>
+            <span class="stat-label">Организаторов</span>
+        </article>
+    </section>
+
+    <section th:if="${importReport != null}" class="import-report">
+        <h2>Импорт завершён</h2>
+        <ul>
+            <li th:text="'Страны: ' + ${importReport.countries}"></li>
+            <li th:text="'Города: ' + ${importReport.cities}"></li>
+            <li th:text="'Пользователи: ' + ${importReport.users}"></li>
+            <li th:text="'Мероприятия: ' + ${importReport.events}"></li>
+            <li th:text="'Активности: ' + ${importReport.activities}"></li>
+            <li th:text="'Команды: ' + ${importReport.teams}"></li>
+        </ul>
+    </section>
+
+    <section class="events-section">
+        <h2>Мероприятия</h2>
+        <div class="events-grid">
+            <article class="event-card" th:each="event : ${events}">
+                <img class="event-cover" th:src="@{/{path}(path=${event.logoPath})}" alt="Обложка мероприятия"/>
+                <div class="event-body">
+                    <h3 th:text="${event.title}">Название</h3>
+                    <p class="event-dates" th:text="${#temporals.format(event.startDate, 'dd.MM.yyyy')} + ' — ' + ${#temporals.format(event.endDate, 'dd.MM.yyyy')}">
+                        01.01.2024 — 02.01.2024
+                    </p>
+                    <p class="event-location" th:text="${event.venueName}">Локация</p>
+                    <p class="event-description" th:text="${event.description}">Описание</p>
+                    <h4>Организаторы</h4>
+                    <ul class="organizers" th:if="${event.organizers != null}">
+                        <li th:each="organizer : ${event.organizers}" th:text="${organizer.firstName} + ' ' + ${organizer.lastName}"></li>
+                    </ul>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="activities-section">
+        <h2>Ближайшие активности</h2>
+        <table class="activities-table">
+            <thead>
+            <tr>
+                <th>Активность</th>
+                <th>Дата и время</th>
+                <th>Локация</th>
+                <th>Модератор</th>
+                <th>Жюри</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="activity : ${activities}">
+                <td>
+                    <span class="activity-title" th:text="${activity.title}">Активность</span>
+                    <p class="activity-desc" th:text="${activity.description}"></p>
+                </td>
+                <td th:text="${activity.startDateTime != null ? #temporals.format(activity.startDateTime, 'dd.MM.yyyy HH:mm') : 'По расписанию'}"></td>
+                <td th:text="${activity.location}"></td>
+                <td th:text="${activity.moderator != null ? activity.moderator.firstName + ' ' + activity.moderator.lastName : 'Назначается'}"></td>
+                <td>
+                    <ul>
+                        <li th:each="member : ${activity.juryMembers}" th:text="${member.lastName} + ' ' + ${member.firstName}"></li>
+                    </ul>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<footer class="app-footer">
+    <img class="footer-illustration" th:src="@{/images/ui/upload-guide.png}" alt="Инструкция по загрузке"/>
+    <p>Используйте кнопку импорта выше, чтобы загрузить актуальные данные из шаблонов Excel и фотоархивов.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,33 @@
+# Maven
+app/target/
+app/.mvn/
+app/mvnw
+app/mvnw.cmd
+
+# IntelliJ / Eclipse
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data imports (оставьте шаблоны вне репозитория)
+app/src/main/resources/static/images/events/
+app/src/main/resources/static/images/participants/
+app/src/main/resources/static/images/moderators/
+app/src/main/resources/static/images/organizers/
+app/src/main/resources/static/images/jury/
+app/src/main/resources/static/images/ui/*.jpg
+app/src/main/resources/static/images/ui/*.png
+app/src/main/resources/db/import/*
+!app/src/main/resources/db/import/.gitkeep
+!app/src/main/resources/static/images/events/.gitkeep
+!app/src/main/resources/static/images/participants/.gitkeep
+!app/src/main/resources/static/images/moderators/.gitkeep
+!app/src/main/resources/static/images/organizers/.gitkeep
+!app/src/main/resources/static/images/jury/.gitkeep
+!app/src/main/resources/static/images/ui/.gitkeep
