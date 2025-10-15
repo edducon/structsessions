@@ -1,0 +1,22 @@
+# Maven
+app/target/
+app/.mvn/
+app/mvnw
+app/mvnw.cmd
+
+# IntelliJ / Eclipse
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Локальные ресурсы и выгрузки
+app/runtime/
+app/src/main/resources/runtime/
+app/src/main/resources/db/import/
+app/src/main/resources/static/
