@@ -18,10 +18,8 @@ public final class DatabaseManager {
         this.configuration = configuration;
     }
 
-    public static DatabaseManager from(AppConfiguration configuration) throws SQLException {
-        DatabaseManager manager = new DatabaseManager(configuration);
-        manager.ensureConnection();
-        return manager;
+    public static DatabaseManager from(AppConfiguration configuration) {
+        return new DatabaseManager(configuration);
     }
 
     public Connection getConnection() throws SQLException {
