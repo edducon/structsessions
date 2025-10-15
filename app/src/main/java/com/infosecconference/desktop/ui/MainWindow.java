@@ -10,7 +10,6 @@ import com.infosecconference.desktop.service.DashboardService;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,13 +24,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Desktop;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLException;
@@ -107,20 +103,6 @@ public class MainWindow extends JFrame {
         title.setFont(theme.titleFont());
         header.add(title, BorderLayout.CENTER);
 
-        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        actions.setOpaque(false);
-
-        JButton dataButton = new JButton("Открыть таблицы и данные");
-        dataButton.setFont(theme.baseFont());
-        dataButton.addActionListener(e -> openMaterialsFolder());
-        actions.add(dataButton);
-
-        JButton styleButton = new JButton("Открыть руководство по стилю");
-        styleButton.setFont(theme.baseFont());
-        styleButton.addActionListener(e -> openStyleGuide());
-        actions.add(styleButton);
-
-        header.add(actions, BorderLayout.EAST);
         return header;
     }
 
@@ -135,49 +117,6 @@ public class MainWindow extends JFrame {
             }
         }
         return new ImageIcon(new byte[0]);
-    }
-
-    private void openStyleGuide() {
-        if (!Desktop.isDesktopSupported()) {
-            JOptionPane.showMessageDialog(this, "Операция не поддерживается в данной среде", "Style Guide", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            Desktop.getDesktop().open(configuration.styleGuidePath().toFile());
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Не удалось открыть руководство: " + ex.getMessage(),
-                    "Style Guide",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void openMaterialsFolder() {
-        if (!Desktop.isDesktopSupported()) {
-            JOptionPane.showMessageDialog(this,
-                    "Операция не поддерживается в данной среде",
-                    "Материалы",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        Path materials = configuration.materialsRoot();
-        if (!Files.exists(materials)) {
-            JOptionPane.showMessageDialog(this,
-                    "Папка с материалами пока отсутствует: " + materials,
-                    "Материалы",
-                    JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-
-        try {
-            Desktop.getDesktop().open(materials.toFile());
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Не удалось открыть каталог: " + ex.getMessage(),
-                    "Материалы",
-                    JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     private void refreshData() {

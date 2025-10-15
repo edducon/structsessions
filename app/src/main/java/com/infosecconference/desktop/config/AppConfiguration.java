@@ -16,22 +16,16 @@ public final class AppConfiguration {
     private final String databaseUrl;
     private final String databaseUser;
     private final String databasePassword;
-    private final Path materialsRoot;
     private final Path imageRoot;
-    private final Path styleGuidePath;
 
     private AppConfiguration(String databaseUrl,
                              String databaseUser,
                              String databasePassword,
-                             Path materialsRoot,
-                             Path imageRoot,
-                             Path styleGuidePath) {
+                             Path imageRoot) {
         this.databaseUrl = databaseUrl;
         this.databaseUser = databaseUser;
         this.databasePassword = databasePassword;
-        this.materialsRoot = materialsRoot;
         this.imageRoot = imageRoot;
-        this.styleGuidePath = styleGuidePath;
     }
 
     public static AppConfiguration load() throws IOException {
@@ -47,13 +41,10 @@ public final class AppConfiguration {
         String dbUser = requireProperty(properties, "db.user");
         String dbPassword = properties.getProperty("db.password", "");
 
-        Path materialsRoot = resolvePath(requireProperty(properties, "materials.root"));
         Path imageRoot = resolvePath(requireProperty(properties, "images.root"));
-        Path styleGuide = resolvePath(requireProperty(properties, "style.guide"));
 
-        ensureDirectory(materialsRoot, "Каталог материалов");
         ensureDirectory(imageRoot, "Каталог изображений");
-        return new AppConfiguration(dbUrl, dbUser, dbPassword, materialsRoot, imageRoot, styleGuide);
+        return new AppConfiguration(dbUrl, dbUser, dbPassword, imageRoot);
     }
 
     private static String requireProperty(Properties properties, String key) {
@@ -93,15 +84,7 @@ public final class AppConfiguration {
         return databasePassword;
     }
 
-    public Path materialsRoot() {
-        return materialsRoot;
-    }
-
     public Path imageRoot() {
         return imageRoot;
-    }
-
-    public Path styleGuidePath() {
-        return styleGuidePath;
     }
 }

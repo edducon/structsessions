@@ -5,7 +5,7 @@ from datetime import date, datetime, timedelta
 import textwrap
 
 BASE_DIR = Path(__file__).resolve().parents[1]
-SESSION_DIR = BASE_DIR / 'Сессия 1'
+SESSION_DIR = BASE_DIR / 'session-1'
 OUTPUT = BASE_DIR / 'app' / 'sql' / 'seed_data.sql'
 
 NS = {'main': 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'}
@@ -97,10 +97,10 @@ def load_cities():
 
 def load_people():
     files = [
-        ('ORGANIZER', SESSION_DIR / 'Организаторы_import' / 'организаторы.xlsx'),
-        ('JURY', SESSION_DIR / 'Жюри_import' / 'жюри-4.xlsx'),
-        ('MODERATOR', SESSION_DIR / 'Модераторы_import' / 'Модераторы.xlsx'),
-        ('PARTICIPANT', SESSION_DIR / 'Участники_import' / 'участники-4.xlsx'),
+        ('ORGANIZER', SESSION_DIR / 'organizers_import' / 'организаторы.xlsx'),
+        ('JURY', SESSION_DIR / 'jury_import' / 'жюри-4.xlsx'),
+        ('MODERATOR', SESSION_DIR / 'moderators_import' / 'Модераторы.xlsx'),
+        ('PARTICIPANT', SESSION_DIR / 'participants_import' / 'участники-4.xlsx'),
     ]
     people = {}
     for role, path in files:
