@@ -1,82 +1,153 @@
-# CyberShield Conference Manager
+# CyberShield Desktop
 
-Веб-приложение для управления конференцией по информационной безопасности. Решение реализовано на стеке **Java 17 + Spring Boot 3 + MySQL** и использует все материалы, полученные на сессиях: Excel-шаблоны, фотоархивы, руководство по стилю, логотип и иконку.
+Настольное приложение для работы с материалами учебных сессий CyberShield. Консоль позволяет импортировать Excel-шаблоны,
+синхронизировать их с базой MySQL и просматривать результаты в интерактивных таблицах, оформленных по брендбуку.
 
 ## Возможности
 
-- Импортирует справочные данные (страны, города), участников, модераторов, организаторов и жюри из Excel-файлов первой сессии.
-- Автоматически сопоставляет активности мероприятия с модераторами, жюри и победителями, формируя команды.
-- Отображает интерактивную панель: карточки мероприятий, ближайшие активности и статистику по ролям.
-- Соблюдает фирменный стиль из "Руководства по стилю": логотип, иконка, цветовая схема и шрифт Comic Sans MS.
+- Импорт всех Excel-файлов, полученных на «Сессии 1»: страны, города, мероприятия, активности, участники, жюри, модераторы,
+  организаторы и победители.
+- Создание и обновление записей в MySQL с сохранением связей (организаторы мероприятия, жюри активностей, команды-победители).
+- Просмотр дашборда с ключевыми метриками, расписанием и списками участников в едином окне.
+- Использование фирменной палитры и шрифта Comic Sans MS из «Руководства по стилю»; открытие PDF-файла брендбука прямо из
+  приложения.
 
 ## Подготовка окружения
 
-1. Установите MySQL 8 и создайте базу данных:
-   ```sql
-   CREATE DATABASE cybershield CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   CREATE USER 'cybershield'@'%' IDENTIFIED BY 'cybershield';
-   GRANT ALL PRIVILEGES ON cybershield.* TO 'cybershield'@'%';
-   FLUSH PRIVILEGES;
-   ```
-2. Скопируйте исходные материалы в структуру проекта `app/src/main/resources`:
+1. Установите Java 17 и Maven 3.9+.
+2. Установите MySQL 8 и создайте схему с таблицами:
 
-   | Источник | Назначение в проекте |
-   |----------|----------------------|
-   | `Общие ресурсы/logo.png` | `app/src/main/resources/static/images/logo.png` |
-   | `Общие ресурсы/icon.ico` | `app/src/main/resources/static/images/icon.ico` |
-   | `Сессия 1/загрузка файлов.png` | `app/src/main/resources/static/images/ui/upload-guide.png` |
-   | `Сессия 1/Кнопка удаления.jpg` | `app/src/main/resources/static/images/ui/delete-button.jpg` |
-   | Папка `Сессия 1/Участники_import/` (включая фото) | `app/src/main/resources/db/import/Участники_import/` |
-   | Папка `Сессия 1/Жюри_import/` | `app/src/main/resources/db/import/Жюри_import/` |
-   | Папка `Сессия 1/Модераторы_import/` | `app/src/main/resources/db/import/Модераторы_import/` |
-   | Папка `Сессия 1/Организаторы_import/` | `app/src/main/resources/db/import/Организаторы_import/` |
-   | Файл `Сессия 1/Cтраны_import.xlsx` | `app/src/main/resources/db/import/Cтраны_import.xlsx` |
-   | Файл `Сессия 1/Город_import.xlsx` | `app/src/main/resources/db/import/Город_import.xlsx` |
-   | Файл `Сессия 1/Активности_import.xlsx` | `app/src/main/resources/db/import/Активности_import.xlsx` |
-   | Файл `Сессия 1/Мероприятия_import/Мероприятия_Информационная безопасность.xlsx` | `app/src/main/resources/db/import/Мероприятия_import/Мероприятия_Информационная безопасность.xlsx` |
-   | Фото мероприятий из `Сессия 1/Мероприятия_import/` | `app/src/main/resources/static/images/events/` (названия без пробелов) |
-   | Фото организаторов/модераторов/жюри/участников | `app/src/main/resources/static/images/organizers`, `.../moderators`, `.../jury`, `.../participants` |
+```sql
+CREATE DATABASE cybershield CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE cybershield;
 
-   > Если в исходном архиве есть дополнительные руководства или pdf, храните их в корне репозитория. Приложение считывает только перечисленные файлы.
+CREATE TABLE countries (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    iso_code VARCHAR(8)
+);
 
-3. Отредактируйте при необходимости `app/src/main/resources/application.yml` (параметры подключения к БД, порт приложения).
+CREATE TABLE cities (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    country_id BIGINT,
+    CONSTRAINT fk_city_country FOREIGN KEY (country_id) REFERENCES countries(id)
+);
+
+CREATE TABLE conference_users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    role VARCHAR(32) NOT NULL,
+    birth_date DATE,
+    city_id BIGINT,
+    country_id BIGINT,
+    organization VARCHAR(255),
+    phone VARCHAR(64),
+    bio TEXT,
+    photo_path VARCHAR(255),
+    CONSTRAINT fk_user_city FOREIGN KEY (city_id) REFERENCES cities(id),
+    CONSTRAINT fk_user_country FOREIGN KEY (country_id) REFERENCES countries(id)
+);
+
+CREATE TABLE events (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) NOT NULL UNIQUE,
+    description TEXT,
+    start_date DATE,
+    end_date DATE,
+    city_id BIGINT,
+    venue VARCHAR(255),
+    image_path VARCHAR(255),
+    brand_color VARCHAR(16),
+    CONSTRAINT fk_event_city FOREIGN KEY (city_id) REFERENCES cities(id)
+);
+
+CREATE TABLE event_organizers (
+    event_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (event_id, user_id),
+    CONSTRAINT fk_event_organizer_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    CONSTRAINT fk_event_organizer_user FOREIGN KEY (user_id) REFERENCES conference_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE activities (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    event_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    start_time DATETIME,
+    end_time DATETIME,
+    moderator_id BIGINT,
+    winner_team VARCHAR(255),
+    CONSTRAINT fk_activity_event FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+    CONSTRAINT fk_activity_moderator FOREIGN KEY (moderator_id) REFERENCES conference_users(id)
+);
+
+CREATE TABLE activity_jury (
+    activity_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    PRIMARY KEY (activity_id, user_id),
+    CONSTRAINT fk_activity_jury_activity FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE,
+    CONSTRAINT fk_activity_jury_user FOREIGN KEY (user_id) REFERENCES conference_users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE teams (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    track VARCHAR(255),
+    score INT DEFAULT 0
+);
+
+CREATE TABLE team_participants (
+    team_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    activity_id BIGINT,
+    PRIMARY KEY (team_id, user_id),
+    CONSTRAINT fk_team_participant_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    CONSTRAINT fk_team_participant_user FOREIGN KEY (user_id) REFERENCES conference_users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_team_participant_activity FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE SET NULL
+);
+```
+
+3. Скопируйте материалы в каталоги, которые приложение ожидает по умолчанию (`app/runtime/...`). Структура соответствует
+   исходным архивам:
+
+   | Источник | Куда положить |
+   |----------|----------------|
+   | `Сессия 1/Cтраны_import.xlsx` | `app/runtime/db/import/Cтраны_import.xlsx` |
+   | `Сессия 1/Город_import.xlsx` | `app/runtime/db/import/Город_import.xlsx` |
+   | `Сессия 1/Активности_import.xlsx` | `app/runtime/db/import/Активности_import.xlsx` |
+   | `Сессия 1/Мероприятия_import/Мероприятия_Информационная безопасность.xlsx` | `app/runtime/db/import/Мероприятия_import/Мероприятия_Информационная безопасность.xlsx` |
+   | Папки `Сессия 1/Участники_import`, `Жюри_import`, `Модераторы_import`, `Организаторы_import` | `app/runtime/db/import/…` (с сохранением имен файлов) |
+   | Фото мероприятий | `app/runtime/images/events/` |
+   | Фото участников/жюри/модераторов/организаторов | `app/runtime/images/participants`, `…/jury`, `…/moderators`, `…/organizers` |
+   | `Общие ресурсы/logo.png` и `icon.ico` | `app/runtime/images/logo.png`, `app/runtime/images/icon.ico` |
+   | PDF «Руководство по стилю» | `app/runtime/style/StyleGuide.pdf` |
+
+   Каталоги создаются автоматически при первом запуске, достаточно перенести файлы.
+
+4. При необходимости измените значения в `app/src/main/resources/application.properties` (URL и учетные данные MySQL,
+   альтернативные пути к материалам).
 
 ## Сборка и запуск
 
 ```bash
 cd app
-mvn spring-boot:run
+mvn clean package
+mvn exec:java
 ```
 
-После старта перейдите в браузере на `http://localhost:8080`. На панели доступна кнопка «Импортировать данные», которая считывает Excel-файлы и формирует сущности в MySQL.
+При запуске откроется окно с вкладками «Панель», «Команда» и «Расписание». Кнопка «Импортировать данные» загрузит все Excel-файлы,
+синхронизирует их с базой и обновит показатели дашборда. Если нужно открыть брендбук, воспользуйтесь кнопкой «Открыть руководство
+по стилю».
 
-## Структура проекта
+## Примечания
 
-```
-app/
-├── pom.xml                          # зависимости Spring Boot, Apache POI, MySQL
-├── src/main/java/com/infosecconference
-│   ├── model/                       # JPA-сущности (страны, города, пользователи, мероприятия, активности, команды)
-│   ├── repository/                  # Spring Data JPA репозитории
-│   ├── service/                     # Бизнес-логика и ExcelImportService
-│   ├── web/                         # MVC-контроллеры и REST API
-│   └── CyberShieldConferenceManagerApplication.java
-└── src/main/resources
-    ├── application.yml              # конфигурация MySQL и сервера
-    ├── templates/index.html         # главная страница панели
-    └── static/                      # стили и ожидаемые ресурсы (логотип, иконка, фотографии)
-```
-
-## Примечания по данным
-
-- **ExcelImportService** использует Apache POI и ожидает оригинальные заголовки колонок (ФИО, почта, страна и т.д.).
-- Поле «страна» в таблицах должно содержать числовые значения — индексы строк в файле `Cтраны_import.xlsx`.
-- Победители активностей берутся из столбца «Победитель» файла `Активности_import.xlsx` и автоматически формируют команду.
-- Для корректного отображения карточек мероприятий положите соответствующие изображения в каталог `static/images/events/` и переименуйте файлы без пробелов (например, `1.jpeg` → `event-1.jpeg`).
-
-## Дальнейшие шаги
-
-- Добавьте аутентификацию и разграничение ролей (участники, модераторы, жюри, организаторы).
-- Реализуйте REST API для внешних интеграций (подача заявок, публикация результатов).
-- Покройте бизнес-логику интеграционными тестами после стабилизации модели данных.
-
+- Все пути к изображениям и Excel-файлам задаются относительно свойства `excel.root` и `images.root`. Приложение не включает
+  сами файлы в репозиторий — скопируйте их вручную перед запуском.
+- Цвета и шрифты загружаются из `style/branding.properties`; значения подобраны по оригинальному брендбуку и могут быть изменены
+  при необходимости.
+- Если импорт завершается с ошибкой, проверьте совпадение названий листов и колонок с исходными шаблонами.
+- Для полноценной работы с фотографиями убедитесь, что имена файлов в Excel совпадают с размещенными изображениями (без пробелов и
+  кириллицы в расширении).
