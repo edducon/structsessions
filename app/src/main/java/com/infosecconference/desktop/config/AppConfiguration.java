@@ -87,4 +87,5 @@ public final class AppConfiguration {
     public Path imageRoot() {
         return imageRoot;
     }
+
 }
