@@ -7,8 +7,6 @@ import com.infosecconference.desktop.model.ConferenceUser;
 import com.infosecconference.desktop.model.Event;
 import com.infosecconference.desktop.model.SummarySnapshot;
 import com.infosecconference.desktop.service.DashboardService;
-import com.infosecconference.desktop.service.ExcelImportService;
-import com.infosecconference.desktop.service.ImportReport;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -27,7 +25,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -48,7 +45,6 @@ public class MainWindow extends JFrame {
     private final AppConfiguration configuration;
     private final BrandingTheme theme;
     private final DashboardService dashboardService;
-    private final ExcelImportService importService;
 
     private final SummaryPanel summaryPanel;
     private final EventsPanel eventsPanel;
@@ -60,13 +56,11 @@ public class MainWindow extends JFrame {
 
     public MainWindow(AppConfiguration configuration,
                       BrandingTheme theme,
-                      DashboardService dashboardService,
-                      ExcelImportService importService) {
+                      DashboardService dashboardService) {
         super("CyberShield Desktop");
         this.configuration = configuration;
         this.theme = theme;
         this.dashboardService = dashboardService;
-        this.importService = importService;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1100, 720));
@@ -116,10 +110,10 @@ public class MainWindow extends JFrame {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         actions.setOpaque(false);
 
-        JButton importButton = new JButton("Импортировать данные");
-        importButton.setFont(theme.baseFont());
-        importButton.addActionListener(e -> runImport());
-        actions.add(importButton);
+        JButton dataButton = new JButton("Открыть таблицы и данные");
+        dataButton.setFont(theme.baseFont());
+        dataButton.addActionListener(e -> openMaterialsFolder());
+        actions.add(dataButton);
 
         JButton styleButton = new JButton("Открыть руководство по стилю");
         styleButton.setFont(theme.baseFont());
@@ -158,49 +152,32 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void runImport() {
-        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() {
-                try {
-                    ImportReport report = importService.importAll();
-                    SwingUtilities.invokeLater(() -> showImportSummary(report));
-                } catch (IOException | SQLException ex) {
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(MainWindow.this,
-                            "Ошибка импорта: " + ex.getMessage(),
-                            "Импорт",
-                            JOptionPane.ERROR_MESSAGE));
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                setCursor(Cursor.getDefaultCursor());
-                refreshData();
-            }
-        }.execute();
-    }
-
-    private void showImportSummary(ImportReport report) {
-        String message = "Импорт завершен успешно!" +
-                "\nСтраны: " + report.countries() +
-                "\nГорода: " + report.cities() +
-                "\nМероприятия: " + report.events() +
-                "\nАктивности: " + report.activities() +
-                "\nУчастники: " + report.participants() +
-                "\nОрганизаторы: " + report.organizers() +
-                "\nМодераторы: " + report.moderators() +
-                "\nЖюри: " + report.jury() +
-                "\nКоманды: " + report.teams();
-        if (!report.warnings().isEmpty()) {
-            message += "\n\nПредупреждения:";
-            for (String warning : report.warnings()) {
-                message += "\n• " + warning;
-            }
+    private void openMaterialsFolder() {
+        if (!Desktop.isDesktopSupported()) {
+            JOptionPane.showMessageDialog(this,
+                    "Операция не поддерживается в данной среде",
+                    "Материалы",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
         }
-        JOptionPane.showMessageDialog(this, message, "Импорт данных", JOptionPane.INFORMATION_MESSAGE);
+
+        Path materials = configuration.materialsRoot();
+        if (!Files.exists(materials)) {
+            JOptionPane.showMessageDialog(this,
+                    "Папка с материалами пока отсутствует: " + materials,
+                    "Материалы",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Desktop.getDesktop().open(materials.toFile());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Не удалось открыть каталог: " + ex.getMessage(),
+                    "Материалы",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void refreshData() {

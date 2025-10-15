@@ -15,7 +15,6 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <exec.mainClass>com.infosecconference.desktop.CyberShieldDesktopApp</exec.mainClass>
-        <poi.version>5.2.5</poi.version>
     </properties>
 
     <dependencies>
@@ -23,16 +22,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>${poi.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-            <version>${poi.version}</version>
         </dependency>
     </dependencies>
 

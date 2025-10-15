@@ -4,7 +4,6 @@ import com.infosecconference.desktop.config.AppConfiguration;
 import com.infosecconference.desktop.config.BrandingTheme;
 import com.infosecconference.desktop.db.DatabaseManager;
 import com.infosecconference.desktop.service.DashboardService;
-import com.infosecconference.desktop.service.ExcelImportService;
 import com.infosecconference.desktop.ui.MainWindow;
 
 import javax.swing.SwingUtilities;
@@ -34,9 +33,8 @@ public final class CyberShieldDesktopApp {
                 DatabaseManager databaseManager = DatabaseManager.from(configuration);
 
                 DashboardService dashboardService = new DashboardService(databaseManager);
-                ExcelImportService importService = new ExcelImportService(configuration, databaseManager, theme);
 
-                MainWindow window = new MainWindow(configuration, theme, dashboardService, importService);
+                MainWindow window = new MainWindow(configuration, theme, dashboardService);
                 window.setVisible(true);
             } catch (Exception ex) {
                 ex.printStackTrace();

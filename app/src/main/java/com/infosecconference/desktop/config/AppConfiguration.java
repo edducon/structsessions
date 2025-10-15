@@ -16,20 +16,20 @@ public final class AppConfiguration {
     private final String databaseUrl;
     private final String databaseUser;
     private final String databasePassword;
-    private final Path excelRoot;
+    private final Path materialsRoot;
     private final Path imageRoot;
     private final Path styleGuidePath;
 
     private AppConfiguration(String databaseUrl,
                              String databaseUser,
                              String databasePassword,
-                             Path excelRoot,
+                             Path materialsRoot,
                              Path imageRoot,
                              Path styleGuidePath) {
         this.databaseUrl = databaseUrl;
         this.databaseUser = databaseUser;
         this.databasePassword = databasePassword;
-        this.excelRoot = excelRoot;
+        this.materialsRoot = materialsRoot;
         this.imageRoot = imageRoot;
         this.styleGuidePath = styleGuidePath;
     }
@@ -47,13 +47,13 @@ public final class AppConfiguration {
         String dbUser = requireProperty(properties, "db.user");
         String dbPassword = properties.getProperty("db.password", "");
 
-        Path excelRoot = resolvePath(requireProperty(properties, "excel.root"));
+        Path materialsRoot = resolvePath(requireProperty(properties, "materials.root"));
         Path imageRoot = resolvePath(requireProperty(properties, "images.root"));
         Path styleGuide = resolvePath(requireProperty(properties, "style.guide"));
 
-        ensureDirectory(excelRoot, "Каталог Excel");
+        ensureDirectory(materialsRoot, "Каталог материалов");
         ensureDirectory(imageRoot, "Каталог изображений");
-        return new AppConfiguration(dbUrl, dbUser, dbPassword, excelRoot, imageRoot, styleGuide);
+        return new AppConfiguration(dbUrl, dbUser, dbPassword, materialsRoot, imageRoot, styleGuide);
     }
 
     private static String requireProperty(Properties properties, String key) {
@@ -93,8 +93,8 @@ public final class AppConfiguration {
         return databasePassword;
     }
 
-    public Path excelRoot() {
-        return excelRoot;
+    public Path materialsRoot() {
+        return materialsRoot;
     }
 
     public Path imageRoot() {
